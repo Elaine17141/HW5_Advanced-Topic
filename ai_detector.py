@@ -2,15 +2,16 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import re
+import os
 import matplotlib.pyplot as plt
-import matplotlib
 import matplotlib.font_manager as fm
 
-# 設定中文顯示
-font_path = "C:/Windows/Fonts/msyh.ttc"   # 微軟雅黑
+font_path = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansTC-VariableFont_wght.ttf")
 font_prop = fm.FontProperties(fname=font_path)
-matplotlib.rcParams['font.family'] = font_prop.get_name()
-matplotlib.rcParams['axes.unicode_minus'] = False
+
+plt.rcParams['font.family'] = font_prop.get_name()
+plt.rcParams['axes.unicode_minus'] = False
+
 
 import seaborn as sns
 from collections import Counter
@@ -207,18 +208,36 @@ def load_custom_css():
 
 load_custom_css()
 
+
+
 # ============================================================
 # 句子与词元处理
 # ============================================================
+
+def remove_emoji(text):
+    emoji_pattern = re.compile(
+    "["                 
+    "\U0001F600-\U0001F64F"  # emoticons
+    "\U0001F300-\U0001F5FF"  # symbols & pictographs
+    "\U0001F680-\U0001F6FF"  # transport & map symbols
+    "\U0001F1E0-\U0001F1FF"  # flags
+    "\U00002700-\U000027BF"  # dingbats
+    "\U0001F900-\U0001F9FF"  # supplemental symbols
+    "\U0001FA70-\U0001FAFF"  # symbols extended-A
+    "]+",
+    flags=re.UNICODE)
+    return emoji_pattern.sub("", text)
 
 def split_sentences(text: str) -> list:
     """分割句子"""
     parts = re.split(r'[。！？!?\n]+', text)
     return [p.strip() for p in parts if p.strip()]
 
-def tokenize(text: str) -> list:
-    """分词"""
-    return re.findall(r'[\u4e00-\u9fff]+|[A-Za-z0-9]+', text)
+def tokenize(text):
+    # 保留中文、英文、數字，其他全部當作 noise 丟掉
+    tokens = re.findall(r'[0-9A-Za-z]+|[\u4e00-\u9fa5]+', text)
+    return tokens
+
 
 # ============================================================
 # 特徵抽取器
@@ -401,6 +420,8 @@ class AIDetectorModel:
 
     def predict(self, text: str) -> Tuple[float, float, Dict]:
         """预测"""
+        text = remove_emoji(text)
+
         if not self.is_trained:
             self.train_sample_model()
 
@@ -414,6 +435,7 @@ class AIDetectorModel:
         ai_prob = float(ai_prob)
         human_prob = 1 - ai_prob
         return ai_prob, human_prob, f
+
 
 # ============================================================
 # Streamlit UI - 美化版

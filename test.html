@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 偵測技術 — 高階理論篇</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+
+  <!-- 全頁容器 -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+    <!-- Slide 1 封面 -->
+    <section id="slide-1" class="min-h-[70vh] flex flex-col md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          人工智慧與資訊安全 · 高階理論
+        </p>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+          AI 偵測技術<br />
+          <span class="text-red-600">深度理論篇</span>
+        </h1>
+        <p class="text-lg text-slate-700 mb-6">
+          AI-generated vs Human-written 文字鑑別：結合高階語言學、統計語言模型、深度學習與對抗攻擊，建立一套
+          「可量化、可視覺化、可實作」的 AI 偵測理論架構。
+        </p>
+
+        <div class="space-y-2 mb-6">
+          <h2 class="text-base font-semibold text-slate-900">
+            🎯 主題焦點
+          </h2>
+          <ul class="list-disc list-inside text-slate-700 space-y-1 text-sm md:text-base">
+            <li>AI 文字 vs 人類文字：本質差異與可量化特徵</li>
+            <li>困惑度（Perplexity）與句子節奏（Burstiness）</li>
+            <li>Stylometry 風格統計與語意向量空間</li>
+            <li>Zipf 長尾分布、XAI 解釋性與對抗攻擊</li>
+          </ul>
+        </div>
+
+        <div class="border-l-4 border-red-500 pl-4 text-sm text-slate-600 space-y-1">
+          <p>本簡報將所有理論整理成 30 張高密度教學 slide，適合作為：</p>
+          <p>➤「AI 偵測技術」課程教材 · 研討會分享 · 系統設計前導說明</p>
+        </div>
+      </div>
+
+      <div class="w-full">
+        <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-red-500/80 via-red-400 to-rose-500 text-white p-6 md:p-8 shadow-xl">
+          <p class="text-sm font-semibold mb-3 tracking-wide uppercase">
+            Conceptual Diagram
+          </p>
+          <p class="text-xl font-bold mb-2">
+            Human vs AI 文字粒子雲示意
+          </p>
+          <p class="text-sm text-red-50 mb-4">
+            右側圖像可替換為：BERT 模型方塊圖 + Human / AI 文字在語意空間中的分佈差異。
+          </p>
+
+          <div class="grid grid-cols-2 gap-4 text-xs md:text-sm">
+            <div class="bg-white/10 rounded-2xl p-3">
+              <p class="font-semibold mb-1">Human-written</p>
+              <ul class="space-y-1 text-red-50">
+                <li>· 粒子雲破碎、跳躍、多叢聚</li>
+                <li>· 情緒驟升驟降，句長不規則</li>
+                <li>· 稀有詞、口語詞分佈拉長尾巴</li>
+              </ul>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3">
+              <p class="font-semibold mb-1">AI-generated</p>
+              <ul class="space-y-1 text-red-50">
+                <li>· 粒子雲連續、集中、形狀規則</li>
+                <li>· 句構穩定，機率最優化</li>
+                <li>· 長尾詞出現頻率不足</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap gap-2 text-[11px] md:text-xs">
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/30">BERT / GPT</span>
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/30">Perplexity Map</span>
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/30">Stylometry</span>
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/30">Semantic Drift</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2 Agenda -->
+    <section id="slide-2" class="min-h-[60vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Introduction · 今日架構
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">
+        Agenda — 本次內容地圖
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <ul class="space-y-2">
+          <li>1. 語言模型如何看待文本？（Language Model &amp; Likelihood）</li>
+          <li>2. 困惑度 Perplexity：定義、公式與實務解讀</li>
+          <li>3. 句子節奏統計 Burstiness：長短句混合度</li>
+          <li>4. Stylometry 寫作風格統計：Lexical / Syntax / Emotion</li>
+          <li>5. 語意向量空間：Embedding Drift &amp; Variance</li>
+        </ul>
+        <ul class="space-y-2">
+          <li>6. Zipf’s Law 長尾分布與「人味」指標</li>
+          <li>7. XAI：模型在看什麼？SHAP / IG 可視覺化</li>
+          <li>8. 傳統 ML vs BERT Hybrid 偵測架構</li>
+          <li>9. 對抗攻擊：錯字插入與隨機化生成</li>
+          <li>10. 完整偵測架構與閾值設計 · 結語</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Slide 3 問題定義 -->
+    <section id="slide-3" class="min-h-[60vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Problem Definition
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          AI 偵測是什麼？— Binary Classification 視角
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          我們要解決的核心問題：<span class="font-semibold">「判斷一段文字是否由 AI 撰寫」</span>。
+        </p>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4 text-sm md:text-base">
+          <p class="font-semibold mb-2">數學化表示：</p>
+          <p class="font-mono text-xs md:text-sm bg-slate-900 text-emerald-200 rounded-lg px-3 py-2 inline-block">
+            f(x) = P(AI ∣ x)
+          </p>
+          <p class="mt-3 text-slate-700">
+            其中 <span class="font-mono">x</span> 為整段文本，我們希望設計一組特徵
+            <span class="font-mono">φ(x)</span>，讓 AI 生成文本與 Human 文本在特徵空間中可分離。
+          </p>
+        </div>
+
+        <div class="text-xs md:text-sm text-slate-600 space-y-1">
+          <p>⚠️ 偵測 ≠ 鑑定：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>輸出的是「AI 機率」而非「司法鑑定」的絕對真相。</li>
+            <li>適合作為輔助訊號、風險指標，而不是唯一決策來源。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-sm">
+          （可放：AI vs Human 樣本文字，右側顯示偵測模型輸出的機率條）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4 AI vs Human 本質差異 -->
+    <section id="slide-4" class="min-h-[60vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Conceptual Contrast
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">
+        AI 文本 vs 人類文本 — 本質差異
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="space-y-2">
+          <p class="font-semibold mb-2">AI 生成文本的典型特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>由大型語言模型根據條件機率產生 → <span class="font-semibold">機率最優</span>、連續穩定</li>
+            <li>整體篇章結構與語氣 <span class="font-semibold">一致性高</span>、邏輯流暢</li>
+            <li>較少極端長句 / 斷裂，較少「情緒爆衝」式表達</li>
+          </ul>
+        </div>
+        <div class="space-y-2">
+          <p class="font-semibold mb-2">Human 文本的典型特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>跳躍性高、帶有噪音；情緒驟升驟降，容易跑題</li>
+            <li>常見錯字、口語化、省略、未完成句</li>
+            <li>主題可能出現 「topic drift」：突然轉向不相關話題</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 border-t pt-4 text-xs md:text-sm text-slate-600">
+        <p>📊 視覺化建議：左右並排相同主題的 AI 文與 Human 文，標出句長、連接詞使用頻率與情緒用語分佈，作為後續指標（PP、Burstiness、Stylometry）的直覺示意。</p>
+      </div>
+    </section>
+
+    <!-- Slide 5 語言模型如何看文本 -->
+    <section id="slide-5" class="min-h-[60vh] md:grid md:grid-cols-2 gap-10 items-start">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Language Model Basics
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          語言模型如何看待一段文本？
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          語言模型會為每一個 token（詞或子詞）計算條件機率：
+        </p>
+        <div class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 mb-4 inline-block">
+          q(wᵢ ∣ w₁, …, wᵢ₋₁)
+        </div>
+
+        <p class="text-sm md:text-base text-slate-700 mb-3">
+          整段文本的 likelihood 可以寫成：
+        </p>
+        <div class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+          q(w₁, …, wₙ) = ∏ᵢ q(wᵢ ∣ context)
+        </div>
+
+        <ul class="mt-4 text-sm md:text-base text-slate-700 space-y-1">
+          <li>· AI 文本：模型自己生成 → 通常位於高機率區域，likelihood 較高。</li>
+          <li>· Human 文本：有時會使用模型不常見的組合 → likelihood 較低且波動大。</li>
+        </ul>
+      </div>
+
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-sm">
+          （可放：簡化的 Transformer / BERT 方塊圖，右側輸出為 token 機率分佈條）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6 Perplexity 公式 -->
+    <section id="slide-6" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Perplexity · 基礎公式
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        交叉熵與困惑度（Perplexity）
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="space-y-4">
+          <div>
+            <p class="font-semibold mb-2">交叉熵 H：</p>
+            <div class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+              H = - (1 / N) · Σ log q(wᵢ)
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold mb-2">困惑度 PP：</p>
+            <div class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+              PP = exp(H)
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-slate-700">
+          <p class="font-semibold mb-1">直覺解讀：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>PP 越低 → 文本對模型而言越「可預期」，貼近高機率語言。</li>
+            <li>PP 越高 → 模型越「困惑」，代表文本包含不尋常用字 / 結構。</li>
+            <li>我們不只看 <span class="font-mono">平均 PP</span>，更關注 <span class="font-mono">PP 的時間序列</span> 與波動。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7 Perplexity 的偵測意義 -->
+    <section id="slide-7" class="min-h-[50vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Perplexity · 應用
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        為什麼 Perplexity 對 AI 偵測有用？
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">Human vs AI PP 型態：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>AI 文本：PP 通常 <span class="font-semibold">較低且平滑</span>，波動幅度小。</li>
+            <li>Human 文本：PP <span class="font-semibold">波動較大</span>，常出現局部高峰（spikes）。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">背後原因：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>人類會犯錯、情緒化、突然換說法 → 出現模型較少見的 token 組合。</li>
+            <li>AI 經訓練後習慣待在「高機率語言區」，避免太多驚喜。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8 Perplexity 視覺化 -->
+    <section id="slide-8" class="min-h-[50vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Perplexity · Visualization
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          PP 時間序列視覺化
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          將每個 token 的 PP 畫成折線圖，橫軸為 token index，縱軸為 PP 值，可清楚看出 Human 與 AI 的節奏差異。
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+          <li>AI 線條：低谷、平順、小起伏。</li>
+          <li>Human 線條：頻繁出現高峰（spikes）、局部亂流。</li>
+        </ul>
+      </div>
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs md:text-sm">
+          （圖示 placeholder：雙折線圖，AI vs Human 的 PP 曲線對照）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9 Burstiness 定義 -->
+    <section id="slide-9" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Sentence Rhythm · Burstiness
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        句子節奏統計：Burstiness 指標
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="space-y-2">
+          <p class="font-semibold">定義：</p>
+          <div class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            Burstiness B = σ / μ
+          </div>
+          <p class="mt-3 text-slate-700">
+            其中 μ 為平均句長，σ 為句長標準差。
+          </p>
+        </div>
+        <div class="space-y-2 text-slate-700">
+          <p class="font-semibold">直覺解釋：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>AI：句長穩定，B 值偏低 → 中庸句長的規則節奏。</li>
+            <li>Human：長短句交錯，B 值偏高 → 時而長句爆發、時而短句切斷。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10 為何 Burstiness 能偵測 AI -->
+    <section id="slide-10" class="min-h-[50vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Burstiness · 應用
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        為什麼 Burstiness 能幫忙抓出 AI？
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">語言模型生成句子的統計傾向：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>為保持可讀性與流暢度，模型偏好落在「合理句長」區間。</li>
+            <li>極短句與極長句比例被壓低，節奏呈現「可預期的中庸」。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">人類寫作的爆發性：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>情緒上來時會一口氣寫很長：「這也太扯了我真的是……」。</li>
+            <li>也會突然只打一句：「太扯了。」</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 11 句長分布示例 -->
+    <section id="slide-11" class="min-h-[50vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Burstiness · Distribution
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          句長分布：單峰 vs 多峰
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          觀察句長的機率分布，可以看見 AI 與 Human 在節奏上的結構差異。
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+          <li>AI：句長分布通常呈現單峰、尾巴短。</li>
+          <li>Human：分布多峰，且長尾拉得較長。</li>
+        </ul>
+      </div>
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs md:text-sm">
+          （圖示 placeholder：AI / Human 句長 histogram 對照）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 12 Stylometry 概念 -->
+    <section id="slide-12" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Stylometry · 風格指紋
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        Stylometry：把寫作習慣變成特徵
+      </h2>
+      <p class="text-sm md:text-base text-slate-700 mb-4">
+        Stylometry 原本用在「作者鑑定」領域，核心思想是：
+        <span class="font-semibold">把寫作風格當成一種可量化的指紋。</span>
+      </p>
+      <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+        <li>從用字、句法、情緒與噪音層面，抽取一組高維特徵。</li>
+        <li>同一作者在這些特徵空間中會形成穩定的「風格叢聚」。</li>
+        <li>AI 與 Human 也可以被視為兩個「作者族群」。</li>
+      </ul>
+    </section>
+
+    <!-- Slide 13 Stylometry Lexical -->
+    <section id="slide-13" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Stylometry · Lexical Layer
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        用字特徵：Lexical 指標
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <ul class="list-disc list-inside space-y-1">
+          <li>TTR（Type-Token Ratio）詞彙多樣性</li>
+          <li>Function words（例如「而且」、「因此」）比例</li>
+          <li>生僻詞與專有名詞的出現頻率</li>
+          <li>人類錯字率與不規則縮寫</li>
+        </ul>
+        <div class="text-slate-700">
+          <p class="font-semibold mb-2">AI / Human 差異：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>AI：Function words 模板化、句首句尾結構高度重複。</li>
+            <li>Human：常出現 idiosyncratic 用字、個人慣用詞、打字錯誤。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14 Stylometry Syntax -->
+    <section id="slide-14" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Stylometry · Syntactic Layer
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        句法特徵：POS / Syntax 結構
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">常見句法特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>POS tag 分布與 POS n-gram</li>
+            <li>句法樹深度、從句結構與修飾語位置</li>
+            <li>被動語態、條列句、條件句比例</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">AI 的句法足跡：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>句型相對工整、結構重複度高。</li>
+            <li>從句分布更可預測，較少半途而廢的句子。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 15 Stylometry Emotion/Noise -->
+    <section id="slide-15" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Stylometry · Emotion & Noise
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        情緒與雜訊層：人類的「不完美」
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">Human 文本特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>情緒曲線起伏明顯：越寫越激動或越寫越冷靜。</li>
+            <li>錯字、emoji、口語、語助詞（啊、欸、真的假的）。</li>
+            <li>打字習慣（少空格、多逗點、不對稱括號）。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">AI 文本特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>情緒多被平滑化，較少極端用詞。</li>
+            <li>幾乎沒有拼字錯誤，標點規則化。</li>
+            <li>用字偏書面、中性、禮貌。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 16 Zipf's Law -->
+    <section id="slide-16" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Advanced Linguistics · Zipf's Law
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        Zipf’s Law：自然語言的長尾分布
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">基本定律：</p>
+          <p class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            f(r) ∝ 1 / r
+          </p>
+          <p class="mt-3 text-slate-700">
+            排名越後面的詞，出現頻率越低；但自然語言中尾端仍有相當長的一段「長尾」。
+          </p>
+        </div>
+        <div class="text-slate-700 space-y-2">
+          <p class="font-semibold mb-1">AI 的問題：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>若訓練或解碼策略過度保守，模型會少用長尾詞。</li>
+            <li>缺乏罕見但極具人味的字詞 → 文字看起來「太正常」。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 17 Zipf 分布圖 -->
+    <section id="slide-17" class="min-h-[50vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Zipf's Law · Visualization
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          log–log Zipf 曲線：尾巴的故事
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          將詞彙頻率畫在 log(rank)–log(freq) 座標上，人類語料通常呈現較長的尾巴。
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+          <li>Human：曲線尾巴較平，表示長尾詞維持一定比例。</li>
+          <li>AI：若過度集中主流詞，尾巴會變短、曲線較陡。</li>
+        </ul>
+      </div>
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs md:text-sm">
+          （圖示 placeholder：Zipf 曲線：Human vs AI）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 18 語意空間 Drift -->
+    <section id="slide-18" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Semantic Space · Drift
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        語意軌跡：Embedding Drift
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">定義：</p>
+          <p class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            Driftₜ = ∥ eₜ − eₜ₋₁ ∥
+          </p>
+          <p class="mt-3 text-slate-700">
+            eₜ 為第 t 個 token 的 embedding，Drift 代表語意在相鄰 token 間的位移量。
+          </p>
+        </div>
+        <div class="space-y-2 text-slate-700">
+          <p class="font-semibold mb-1">理論觀察：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>AI：語意走向較穩定，Drift 分布偏小。</li>
+            <li>Human：容易突然轉彎、插入側題 → 出現較大的 Drift。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 19 語意變異度 -->
+    <section id="slide-19" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Semantic Space · Variance
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        語意變異度：Variance / Kurtosis / Coherence
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="text-slate-700 space-y-2">
+          <p class="font-semibold mb-1">做法：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>取整段文字的所有 token embeddings。</li>
+            <li>計算 variance、kurtosis 與 coherence score。</li>
+          </ul>
+        </div>
+        <div class="text-slate-700 space-y-2">
+          <p class="font-semibold mb-1">觀察指標：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>AI：語意向量聚集較緊密，一致度高。</li>
+            <li>Human：變異度較大，甚至會形成多個不同主題的叢聚。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 20 語意軌跡視覺化 -->
+    <section id="slide-20" class="min-h-[50vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Semantic Space · Trajectory
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          語意軌跡 2D 投影
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          將 token embedding 透過 PCA / t-SNE 投影到 2D 平面，並依照時間連線，即可看到文本的語意散步路徑。
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+          <li>AI：路徑平順、折點少。</li>
+          <li>Human：路徑跳躍，多次大幅轉向。</li>
+        </ul>
+      </div>
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs md:text-sm">
+          （圖示 placeholder：2D embedding 軌跡：AI vs Human）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 21 XAI 模型在看什麼 -->
+    <section id="slide-21" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        XAI · What the Model Sees
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        可解釋 AI：偵測器到底在抓什麼特徵？
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">AI 文本高相關特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>模板化連接詞：「因此」、「總結來說」、「值得注意的是」。</li>
+            <li>過度一致的開場與結尾句型。</li>
+            <li>中性而禮貌的語氣，極少粗俗或強烈情緒詞。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">Human 文本常見高權重特徵：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>語氣詞與口語片語：「欸」、「超扯」、「真的假的」。</li>
+            <li>錯字、斷句、表情符號。</li>
+            <li>topic jump：突然轉向個人經驗或八卦。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 22 SHAP / IG 可視化 -->
+    <section id="slide-22" class="min-h-[50vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          XAI · Token Attribution
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          SHAP / Integrated Gradients 熱力圖
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          透過 SHAP 或 IG，我們可以標示出「哪些 token 對 AI / Human 分類影響最大」，讓偵測器不再是黑箱。
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1">
+          <li>AI：連接詞、模板句 opening / closing 常亮起高權重。</li>
+          <li>Human：稀有詞、噪音 token、情緒化詞彙常成為關鍵指標。</li>
+        </ul>
+      </div>
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-white shadow-sm border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs md:text-sm">
+          （圖示 placeholder：token 熱力圖，顯示重要度）
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 23 傳統 ML 決策模式 -->
+    <section id="slide-23" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Detection Model · Classical ML
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        傳統機器學習：特徵向量 + Logistic Regression
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">特徵向量設計：</p>
+          <p class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            φ(x) = [ PP, B, TTR, POS, Zipf-tail, Drift, … ]
+          </p>
+          <p class="mt-3 text-slate-700">
+            將前面所有統計與語意指標組合成一個高維向量。
+          </p>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">Logistic Regression 決策：</p>
+          <p class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            P(AI ∣ x) = σ(wᵀ φ(x) + b)
+          </p>
+          <p class="mt-3 text-slate-700">
+            優點：可解釋、計算量低、容易部署；缺點：難以捕捉複雜語意與長距依賴。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 24 深度學習決策模式（BERT） -->
+    <section id="slide-24" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Detection Model · Deep Learning
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        BERT-based 偵測：CLS 向量 + Sigmoid
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="space-y-2">
+          <p class="font-semibold mb-2">架構：</p>
+          <p class="bg-slate-900 text-emerald-200 text-xs md:text-sm font-mono rounded-xl px-4 py-3 inline-block">
+            P(AI ∣ x) = σ(W · CLS(x) + b)
+          </p>
+          <p class="mt-3 text-slate-700">
+            其中 CLS(x) 為 BERT 對整段文本的聚合表示向量。
+          </p>
+        </div>
+        <div class="space-y-2 text-slate-700">
+          <p class="font-semibold mb-1">Hybrid Model：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>可將 CLS 向量與人工特徵 φ(x) 拼接。</li>
+            <li>結合「深度語意」與「可解釋統計指標」，提升偵測效果與說服力。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 25 閾值設計 -->
+    <section id="slide-25" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Operational Design · Threshold
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        偵測閾值（Threshold）如何設定？
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">高閾值的策略：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>只有非常高機率時才標記為 AI。</li>
+            <li>優點：保護人，避免錯誤指控 Human。</li>
+            <li>適用：學術倫理、申請文件、敏感場景。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">低閾值的策略：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>寧可多抓，也接受一定 False Positive。</li>
+            <li>適用：Spam / Bot 偵測、內容審查預警。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 26 實務限制 -->
+    <section id="slide-26" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Limitations · Real World
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        實務上的限制與挑戰
+      </h2>
+
+      <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-2">
+        <li>新一代 LLM（特別是指令微調與人類編輯後文本）越來越像人類。</li>
+        <li>混合文本：AI 生成初稿，人類改寫後，風格變得模糊。</li>
+        <li>Domain shift：科學論文、社群貼文、程式碼等語域差異巨大。</li>
+        <li>多語言情境：不同語言需重新標定特徵分布與閾值。</li>
+      </ul>
+    </section>
+
+    <!-- Slide 27 對抗攻擊 1 -->
+    <section id="slide-27" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Adversarial Attack · Typo Injection
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        對抗攻擊（一）：刻意插入錯字與噪音
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">策略：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>先由 AI 生成文章，再刻意插入錯字、亂空格與口語片語。</li>
+            <li>目標是讓 Perplexity ↑、Burstiness ↑，模仿人類噪音。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">影響：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>若偵測器只依賴表層統計指標，可能被誤導。</li>
+            <li>因此需要結合語意空間與 Stylometry 深層特徵。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 28 對抗攻擊 2 -->
+    <section id="slide-28" class="min-h-[55vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        Adversarial Attack · Sampling
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        對抗攻擊（二）：調整生成參數增加「人味」
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div>
+          <p class="font-semibold mb-2">常見手法：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>調高 Temperature。</li>
+            <li>增大 top-k / top-p。</li>
+            <li>刻意加入隨機改寫、同義詞替換。</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold mb-2">結果：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>使 Zipf 尾巴變長、句長分布更接近 Human。</li>
+            <li>迫使偵測器必須依賴更「深層」的語意與風格特徵。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 29 完整偵測架構總覽 -->
+    <section id="slide-29" class="min-h-[60vh] rounded-3xl bg-white shadow-sm p-6 md:p-10">
+      <p class="text-sm font-semibold text-red-600 mb-2">
+        System Overview · Detection Pipeline
+      </p>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">
+        完整 AI 偵測架構：從特徵到決策
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-8 text-sm md:text-base">
+        <div class="space-y-2">
+          <p class="font-semibold mb-2">五大模組：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>語言模型特徵：PP、log prob variance。</li>
+            <li>句子節奏：Burstiness、句長分布。</li>
+            <li>Stylometry：Lexical / Syntax / Emotion / Noise。</li>
+            <li>語意空間：Drift、Variance、Coherence。</li>
+            <li>分類器：傳統 ML / BERT / Hybrid。</li>
+          </ul>
+        </div>
+        <div class="space-y-2 text-slate-700">
+          <p class="font-semibold mb-1">可對應到實作流程：</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>前處理 → 特徵抽取 → 模型推論 → XAI 解釋 → 報表輸出。</li>
+            <li>可進一步包裝成 Web 介面，供老師 / 管理者直接貼上文字查看 AI 機率。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 30 結語 -->
+    <section id="slide-30" class="min-h-[60vh] md:grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm font-semibold text-red-600 mb-2">
+          Conclusion
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold mb-4">
+          結語：AI 偵測是一門跨學科的科學
+        </h2>
+        <p class="text-sm md:text-base text-slate-700 mb-4">
+          AI vs Human 的差異，可以透過多個維度被量化：
+        </p>
+        <ul class="list-disc list-inside text-sm md:text-base text-slate-700 space-y-1 mb-4">
+          <li>統計語言學指標：Perplexity、Burstiness、Zipf’s Law。</li>
+          <li>高階語言學與風格學：Stylometry、多層風格特徵。</li>
+          <li>語意向量空間：Embedding Drift / Variance / Coherence。</li>
+          <li>深度學習模型與 XAI 解釋工具。</li>
+        </ul>
+        <div class="border-l-4 border-red-500 pl-4 text-xs md:text-sm text-slate-700 space-y-1">
+          <p class="font-semibold">關鍵提醒：</p>
+          <p>偵測 ≠ 鑑定 — 我們提供的是「訊號與機率」，協助人類做更負責任的判斷，而不是替代司法或倫理決策。</p>
+        </div>
+      </div>
+
+      <div class="w-full">
+        <div class="h-64 md:h-80 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-slate-100 p-6 md:p-8 shadow-xl flex flex-col justify-between">
+          <div>
+            <p class="text-sm font-semibold text-red-300 mb-2">
+              Next Step · 實作建議
+            </p>
+            <ul class="list-disc list-inside text-xs md:text-sm space-y-1">
+              <li>實作一個簡單 Web 偵測介面（Flask / Streamlit）。</li>
+              <li>串接一個開源語言模型計算 PP 與 token prob。</li>
+              <li>以真實 Human / AI 文本建立訓練與驗證資料集。</li>
+              <li>加入 XAI 視覺化板塊，讓使用者看見模型在看什麼。</li>
+            </ul>
+          </div>
+          <div class="text-xs md:text-sm text-slate-300 mt-4">
+            <p class="font-semibold">感謝聆聽 🙌</p>
+            <p>歡迎將本架構延伸到作業批改、學術查核、內容風險控管等場景。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

@@ -3,6 +3,15 @@ import numpy as np
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
+import matplotlib
+import matplotlib.font_manager as fm
+
+# 設定中文顯示
+font_path = "C:/Windows/Fonts/msyh.ttc"   # 微軟雅黑
+font_prop = fm.FontProperties(fname=font_path)
+matplotlib.rcParams['font.family'] = font_prop.get_name()
+matplotlib.rcParams['axes.unicode_minus'] = False
+
 import seaborn as sns
 from collections import Counter
 from sklearn.preprocessing import StandardScaler
